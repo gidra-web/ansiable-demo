@@ -1,0 +1,45 @@
+---
+
+- hosts: all
+  become: true
+  pre_tasks:
+
+  - name: install updates (CentOS)
+    tags: always
+    dnf:
+      update_only: yes
+      update_cache: yes
+    when: ansible_distribution == "CentOS"
+
+  - name: install updates (Ubuntu)
+    tags: always
+    apt:
+      upgrade: dist
+      update_cache: yes
+    when: ansible_distribution == "Ubuntu"
+
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: create user
+    tags: always
+    user:
+      name: gidra
+      groups: root,sudo
+
+  - name: add ssh key for user
+    tags: always
+    authorized_key:
+      user: gidra
+      key: ssh-ed25519 AAAAC3NzaC11ZDI1NTE5AAAAIIxE2HvejKSve7wlcClc+mjfmk0SgyyagaQHucwkv5it gidra@workspace"
+
+  - name: add sudoers file for user
+    tags: always
+    copy:
+      src: sudoers
+      dest: /etc/sudoers.d/gidra
+      owner: root
+      group: root
+      mode: 0440
