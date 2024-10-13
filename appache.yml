@@ -1,23 +1,32 @@
 ---
 
 - hosts: all
+  vars:
+    packages:
+      - name: apache2
+        require: true
+      - name: libapache2-mod-php
+        require: true
+      - name: libapache2-mod-php
+        require: true
+      - name: httpd
+        require: true
+        package: dnf
   become: true
   tasks:
 
-  - name: install apache and php for Ubuntu servers
+  - name: install {{ item.name }} for Ubuntu servers
     apt:
-      name:
-        - apache2
-        - libapache2-mod-php
+      name: "{{ item.name }}"
       state: latest
       update_cache: yes
-    when: ansible_distribution == "Ubuntu"
+    when: ansible_distribution == "Ubuntu" && require == true
 
-  - name: install apache and php for CentOS servers
+  - name: install {{ item.name }} for CentOS servers
     dnf:
-      name:
-        - httpd
-        - php
+      name: "{{ item.name}}"
       state: latest
       update_cache: yes
-    when: ansible_distribution == "CentOS"
+    when: ansible_distribution == "CentOS" && item.require == true && item.package == dnf
+  
+  loop: "{{ packages }}"
